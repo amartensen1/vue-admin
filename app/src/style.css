@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* App shell sizing */
+#app {
+  min-height: 100vh;
+}
