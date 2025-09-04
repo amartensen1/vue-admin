@@ -1,12 +1,23 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { useSessionStore } from "../stores/session";
 
 const routes: RouteRecordRaw[] = [
-  { path: '/', redirect: '/institution' },
-  { path: '/institution', name: 'Institution', component: () => import('../views/Institution.vue') },
-  { path: '/terms', name: 'Terms', component: () => import('../views/Terms.vue') },
-  { path: '/programs', name: 'Programs', component: () => import('../views/Programs.vue') },
-  { path: '/partners', name: 'Partners', component: () => import('../views/Partners.vue') },
-  { path: '/users', name: 'Users', component: () => import('../views/Users.vue') },
+  {
+    path: "/signin",
+    name: "SignIn",
+    component: () => import("../views/SignIn.vue"),
+    meta: { public: true },
+  },
+  {
+    path: "/",
+    redirect: "/apps",
+  },
+  {
+    path: "/apps",
+    name: "Applications",
+    component: () => import("../views/Applications.vue"),
+    meta: { requiresAuth: true },
+  },
 ]
 
 const router = createRouter({
@@ -16,6 +27,16 @@ const router = createRouter({
     return { top: 0 }
   },
 })
+
+router.beforeEach((to) => {
+  const session = useSessionStore();
+  const isPublic = to.meta.public === true;
+  if (isPublic) return true;
+  if (to.meta.requiresAuth && !session.isSignedIn) {
+    return { path: "/signin", query: { next: to.fullPath } };
+  }
+  return true;
+});
 
 export default router
 
