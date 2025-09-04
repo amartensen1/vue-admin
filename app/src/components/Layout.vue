@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 type Role = 'Admin' | 'Instructor' | 'High School Staff'
 const roles: Role[] = ['Admin', 'Instructor', 'High School Staff']
 const selectedRole = ref<Role>('Admin')
 
-const router = useRouter()
 const route = useRoute()
 
 watch(selectedRole, () => {
