@@ -1,0 +1,19 @@
+---
+description: "Atomic Design + globally reusable UI components (compat-safe)"
+globs:
+  - "src/components/**"
+  - "apps/**/components/**"
+  - "packages/ui/**"
+  - "libs/ui/**"
+alwaysApply: false
+---
+
+# Purpose
+Adopt **Atomic Design** (atoms → molecules → organisms → templates → pages) while ensuring **platform-wide reusability** of UI components.
+
+# Coexistence & Precedence (avoid rule conflicts)
+- If another rule (design system, accessibility, testing, or naming) **contradicts** guidance here, **defer to the more specific rule** scoped to that package or directory.
+- Do **not** re-implement primitives already provided by the project’s design system. Prefer **wrappers** around existing tokens/components.
+- Keep this rule **UI-only**: no data fetching, routing, analytics, or app-specific logic.
+
+# Folder Taxonomy

@@ -31,6 +31,7 @@ alwaysApply: true
       UI and Styling
       - Use Shadcn Vue, Radix Vue, and Tailwind for components and styling.
       - Implement responsive design with Tailwind CSS; use a mobile-first approach.
+      - Use an Atomic Design Methodology for mang
       
       Performance Optimization
       - Leverage Nuxt's built-in performance optimizations.

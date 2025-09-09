@@ -18,6 +18,60 @@ const routes: RouteRecordRaw[] = [
     component: () => import("../views/Applications.vue"),
     meta: { requiresAuth: true },
   },
+  {
+    path: "/registrations",
+    name: "Registrations",
+    component: () => import("../views/Registrations.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/registrations/:id",
+    name: "RegistrationDetail",
+    component: () => import("../views/RegistrationDetail.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/consent/:token",
+    name: "ParentConsent",
+    component: () => import("../views/ParentConsent.vue"),
+    meta: { public: true },
+  },
+  {
+    path: "/admin/:tab?",
+    name: "AdminLite",
+    component: () => import("../views/AdminLite.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/high-schools/:id",
+    name: "HighSchoolDetail",
+    component: () => import("../views/HighSchoolDetail.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/programs/:id",
+    name: "ProgramDetail",
+    component: () => import("../views/ProgramDetail.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/terms/:id",
+    name: "TermDetail",
+    component: () => import("../views/TermDetail.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/courses/:id",
+    name: "CourseDetail",
+    component: () => import("../views/CourseDetail.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/sections/:id",
+    name: "SectionDetail",
+    component: () => import("../views/SectionDetail.vue"),
+    meta: { requiresAuth: true },
+  },
 ]
 
 const router = createRouter({

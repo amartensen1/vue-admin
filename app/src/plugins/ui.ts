@@ -16,10 +16,12 @@ import UiEmptyState from "../components/ui/molecules/UiEmptyState.vue";
 import UiModal from "../components/ui/molecules/UiModal.vue";
 import UiDrawer from "../components/ui/molecules/UiDrawer.vue";
 import UiToolbar from "../components/ui/molecules/UiToolbar.vue";
+import UiTabs from "../components/ui/molecules/UiTabs.vue";
 
 // Organisms
 import AppHeader from "../components/ui/organisms/AppHeader.vue";
 import UiDataTable from "../components/ui/organisms/UiDataTable.vue";
+import RegistrationTimeline from "../components/ui/organisms/RegistrationTimeline.vue";
 
 export default {
   install(app: App) {
@@ -38,9 +40,11 @@ export default {
     app.component("UiModal", UiModal);
     app.component("UiDrawer", UiDrawer);
     app.component("UiToolbar", UiToolbar);
+    app.component("UiTabs", UiTabs);
     // Organisms
     app.component("AppHeader", AppHeader);
     app.component("UiDataTable", UiDataTable);
+    app.component("RegistrationTimeline", RegistrationTimeline);
   },
 };
 

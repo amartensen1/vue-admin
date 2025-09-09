@@ -11,6 +11,23 @@ const { currentUser } = storeToRefs(session);
       <div class="flex items-center gap-2 sm:gap-3">
         <span class="font-semibold">DualEnroll</span>
         <UiBadge tone="warning">Prototype</UiBadge>
+        <nav class="ml-2 flex items-center gap-1">
+          <router-link
+            to="/apps"
+            class="px-2 py-1 rounded text-sm"
+            :class="$route.path.startsWith('/apps') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'"
+          >Applications</router-link>
+          <router-link
+            to="/registrations"
+            class="px-2 py-1 rounded text-sm"
+            :class="$route.path.startsWith('/registrations') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'"
+          >Registrations</router-link>
+          <router-link
+            to="/admin"
+            class="px-2 py-1 rounded text-sm"
+            :class="$route.path.startsWith('/admin') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'"
+          >Admin</router-link>
+        </nav>
       </div>
       <div class="flex items-center gap-2 sm:gap-3">
         <span v-if="currentUser" class="text-sm text-gray-700 max-w-[40vw] sm:max-w-none truncate">{{ currentUser.email }}</span>

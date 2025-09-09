@@ -33,6 +33,12 @@ const form = ref({
   guardianEmail: "",
   guardianPhone: "",
   notes: "",
+  hs_current_grade: "",
+  hs_stud_id: "",
+  hs_start_date: "",
+  hs_grad_date: "",
+  hs_gpa: "",
+  class_rank: "",
 });
 const errors = ref<Record<string, string>>({});
 const docs = ref<DocumentMetadata[]>(Repository.listDocuments());
@@ -73,6 +79,12 @@ function openEdit(id: string) {
     guardianEmail: r.guardians?.[0]?.email ?? "",
     guardianPhone: r.guardians?.[0]?.phone ?? "",
     notes: r.notes ?? "",
+    hs_current_grade: r.hs_current_grade ?? "",
+    hs_stud_id: r.hs_stud_id ?? "",
+    hs_start_date: r.hs_start_date ?? "",
+    hs_grad_date: r.hs_grad_date ?? "",
+    hs_gpa: r.hs_gpa?.toString?.() ?? "",
+    class_rank: r.class_rank ?? "",
   });
   errors.value = {};
   drawerOpen.value = true;
@@ -110,6 +122,12 @@ function saveDraft() {
       school: { name: form.value.schoolName || undefined },
       guardians: form.value.guardianName || form.value.guardianEmail || form.value.guardianPhone ? [{ name: form.value.guardianName || undefined, email: form.value.guardianEmail || undefined, phone: form.value.guardianPhone || undefined }] : [],
       notes: form.value.notes || undefined,
+      hs_current_grade: form.value.hs_current_grade || undefined,
+      hs_stud_id: form.value.hs_stud_id || undefined,
+      hs_start_date: form.value.hs_start_date || undefined,
+      hs_grad_date: form.value.hs_grad_date || undefined,
+      hs_gpa: form.value.hs_gpa ? Number(form.value.hs_gpa) : undefined,
+      class_rank: form.value.class_rank || undefined,
     };
     records.value = [...records.value, created];
     Repository.saveApplications(records.value);
@@ -121,6 +139,12 @@ function saveDraft() {
       school: { name: form.value.schoolName || undefined },
       guardians: form.value.guardianName || form.value.guardianEmail || form.value.guardianPhone ? [{ name: form.value.guardianName || undefined, email: form.value.guardianEmail || undefined, phone: form.value.guardianPhone || undefined }] : [],
       notes: form.value.notes || undefined,
+      hs_current_grade: form.value.hs_current_grade || undefined,
+      hs_stud_id: form.value.hs_stud_id || undefined,
+      hs_start_date: form.value.hs_start_date || undefined,
+      hs_grad_date: form.value.hs_grad_date || undefined,
+      hs_gpa: form.value.hs_gpa ? Number(form.value.hs_gpa) : undefined,
+      class_rank: form.value.class_rank || undefined,
     });
     if (updated) {
       records.value = records.value.map(r => r.id === updated.id ? updated : r);
@@ -354,6 +378,26 @@ function onSortChange(payload: { key: string; dir: 'asc' | 'desc' }) {
           <UiFormField label="High School name">
             <UiInput v-model="form.schoolName" :disabled="isReadOnly" />
           </UiFormField>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <UiFormField label="HS current grade">
+              <UiInput v-model="form.hs_current_grade" :disabled="isReadOnly" />
+            </UiFormField>
+            <UiFormField label="HS student ID">
+              <UiInput v-model="form.hs_stud_id" :disabled="isReadOnly" />
+            </UiFormField>
+            <UiFormField label="HS start date">
+              <UiInput v-model="form.hs_start_date" type="date" :disabled="isReadOnly" />
+            </UiFormField>
+            <UiFormField label="HS grad date">
+              <UiInput v-model="form.hs_grad_date" type="date" :disabled="isReadOnly" />
+            </UiFormField>
+            <UiFormField label="HS GPA">
+              <UiInput v-model="form.hs_gpa" type="number" step="0.01" :disabled="isReadOnly" />
+            </UiFormField>
+            <UiFormField label="Class rank">
+              <UiInput v-model="form.class_rank" :disabled="isReadOnly" />
+            </UiFormField>
+          </div>
         </section>
 
         <section class="space-y-2">
