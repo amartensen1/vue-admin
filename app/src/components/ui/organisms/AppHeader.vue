@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from "pinia";
 import { useSessionStore } from "../../../stores/session";
@@ -7,19 +7,41 @@ const session = useSessionStore();
 const { currentUser } = storeToRefs(session);
 const emit = defineEmits(["toggle-nav"]) 
 const showUserMenu = ref(false)
+const menuEl = ref<HTMLElement | null>(null)
+const triggerEl = ref<HTMLElement | null>(null)
 const router = useRouter()
 
 function openUserMenu(){ showUserMenu.value = true }
 function closeUserMenu(){ showUserMenu.value = false }
 async function goSettings(){
   closeUserMenu()
-  router.push({ name: 'AdminLite', params: { tab: 'Settings' } })
+  router.push({ name: 'AccountOverview' })
+}
+function goProfile(){
+  closeUserMenu()
+  // Placeholder navigation; implement profile view later
+  router.push({ name: 'Applications' })
 }
 async function signOut(){
   closeUserMenu()
   session.signOut();
   router.replace('/signin')
 }
+
+function onDocPointerDown(e: Event){
+  if (!showUserMenu.value) return
+  const t = e.target as Node
+  if (menuEl.value && menuEl.value.contains(t)) return
+  if (triggerEl.value && triggerEl.value.contains(t)) return
+  closeUserMenu()
+}
+
+onMounted(()=>{
+  document.addEventListener('pointerdown', onDocPointerDown, true)
+})
+onBeforeUnmount(()=>{
+  document.removeEventListener('pointerdown', onDocPointerDown, true)
+})
 </script>
 
 <template>
@@ -37,15 +59,17 @@ async function signOut(){
           @click="openUserMenu"
           aria-haspopup="dialog"
           :aria-expanded="showUserMenu ? 'true' : 'false'"
+          ref="triggerEl"
         >
           {{ currentUser.email }}
         </button>
 
         <!-- User menu dialog -->
         <div v-if="showUserMenu" class="fixed inset-0 z-40" @click="closeUserMenu"></div>
-        <div v-if="showUserMenu" class="absolute right-0 top-full mt-2 z-50 w-48 rounded border bg-white shadow-lg">
+        <div v-if="showUserMenu" class="absolute right-0 top-full mt-2 z-50 w-48 rounded border bg-white shadow-lg" ref="menuEl">
           <div class="py-1">
-            <button class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50" @click="goSettings">Settings</button>
+            <button class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50" @click="goProfile">Profile</button>
+            <button class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50" @click="goSettings">Account Settings</button>
             <button class="w-full text-left px-3 py-2 text-sm text-danger hover:bg-red-50" @click="signOut">Sign out</button>
           </div>
         </div>

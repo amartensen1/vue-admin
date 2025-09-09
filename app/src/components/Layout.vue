@@ -16,29 +16,37 @@ function toggleCollapse(){ isCollapsed.value = !isCollapsed.value }
           <span class="text-sm font-semibold" :class="isCollapsed ? 'sr-only' : ''">Navigation</span>
           <button class="px-2 py-1 rounded text-xs border" :title="isCollapsed ? 'Expand' : 'Collapse'" @click="toggleCollapse">{{ isCollapsed ? '›' : '‹' }}</button>
         </div>
-        <nav class="p-2 space-y-1">
-          <router-link to="/apps" class="flex items-center gap-2 px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/apps') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'">
-            <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs">A</span>
-            <span :class="isCollapsed ? 'hidden' : ''">Applications</span>
-          </router-link>
-          <router-link to="/registrations" class="flex items-center gap-2 px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/registrations') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'">
-            <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs">R</span>
-            <span :class="isCollapsed ? 'hidden' : ''">Registrations</span>
-          </router-link>
-          <router-link to="/admin" class="flex items-center gap-2 px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/admin') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'">
-            <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs">Ad</span>
-            <span :class="isCollapsed ? 'hidden' : ''">Admin</span>
-          </router-link>
-        </nav>
+        <div class="flex-1 flex flex-col">
+          <nav class="p-2 space-y-1">
+            <router-link to="/apps" class="flex items-center gap-2 px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/apps') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'">
+              <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs">A</span>
+              <span :class="isCollapsed ? 'hidden' : ''">Applications</span>
+            </router-link>
+            <router-link to="/registrations" class="flex items-center gap-2 px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/registrations') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'">
+              <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs">R</span>
+              <span :class="isCollapsed ? 'hidden' : ''">Registrations</span>
+            </router-link>
+          </nav>
+          <nav class="mt-auto p-2 border-t">
+            <router-link to="/admin" class="flex items-center gap-2 px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/admin') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'">
+              <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs">S</span>
+              <span :class="isCollapsed ? 'hidden' : ''">Settings</span>
+            </router-link>
+          </nav>
+        </div>
       </aside>
 
       <!-- Mobile drawer (overlays under header) -->
       <UiDrawer class="sm:hidden" :open="navOpen" side="left" title="Navigation" @close="navOpen=false">
-        <nav class="space-y-1">
-          <router-link to="/apps" class="block px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/apps') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'" @click="navOpen=false">Applications</router-link>
-          <router-link to="/registrations" class="block px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/registrations') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'" @click="navOpen=false">Registrations</router-link>
-          <router-link to="/admin" class="block px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/admin') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'" @click="navOpen=false">Admin</router-link>
-        </nav>
+        <div class="flex flex-col min-h-[60vh]">
+          <nav class="space-y-1">
+            <router-link to="/apps" class="block px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/apps') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'" @click="navOpen=false">Applications</router-link>
+            <router-link to="/registrations" class="block px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/registrations') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'" @click="navOpen=false">Registrations</router-link>
+          </nav>
+          <nav class="mt-auto pt-2 border-t">
+            <router-link to="/admin" class="block px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/admin') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'" @click="navOpen=false">Settings</router-link>
+          </nav>
+        </div>
       </UiDrawer>
 
       <main class="flex-1 bg-gray-50">

@@ -3,6 +3,18 @@ import { useSessionStore } from "../stores/session";
 
 const routes: RouteRecordRaw[] = [
   {
+    path: "/account",
+    name: "AccountOverview",
+    component: () => import("../views/AccountOverview.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/account/settings",
+    name: "AccountSettings",
+    component: () => import("../views/AccountSettings.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
     path: "/signin",
     name: "SignIn",
     component: () => import("../views/SignIn.vue"),

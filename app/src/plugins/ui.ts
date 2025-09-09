@@ -9,6 +9,7 @@ import UiBadge from "../components/ui/atoms/UiBadge.vue";
 import UiTextarea from "../components/ui/atoms/UiTextarea.vue";
 import UiCheckbox from "../components/ui/atoms/UiCheckbox.vue";
 import UiFileButton from "../components/ui/atoms/UiFileButton.vue";
+import UiAvatar from "../components/ui/atoms/UiAvatar.vue";
 
 // Molecules
 import UiFormField from "../components/ui/molecules/UiFormField.vue";
@@ -34,6 +35,7 @@ export default {
     app.component("UiTextarea", UiTextarea);
     app.component("UiCheckbox", UiCheckbox);
     app.component("UiFileButton", UiFileButton);
+    app.component("UiAvatar", UiAvatar);
     // Molecules
     app.component("UiFormField", UiFormField);
     app.component("UiEmptyState", UiEmptyState);
