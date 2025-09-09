@@ -1,13 +1,21 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { ConsentTokensRepo, ConsentsRepo, RegistrationsRepo, IdUtil } from '../repo/storage'
+import { idFactory } from '../helpers/idFactory'
+import { useConsentTokensStore } from '../stores/consent-tokens.store'
+import { useConsentsStore } from '../stores/consents.store'
+import { useRegistrationsStore } from '../stores/registrations.store'
 
 const route = useRoute()
 const token = String(route.params.token || '')
-const tokenRec = ConsentTokensRepo.byToken(token)
-const isExpired = tokenRec ? new Date(tokenRec.expiresAt).getTime() < Date.now() : true
-const registration = tokenRec ? RegistrationsRepo.list().find(r => r.id === tokenRec.registrationId) : null
+const tokensStore = useConsentTokensStore()
+const consentsStore = useConsentsStore()
+const regsStore = useRegistrationsStore()
+await tokensStore.fetchAll()
+await regsStore.fetchAll()
+const tokenRec = ref(tokensStore.byToken(token))
+const isExpired = ref(tokenRec.value ? new Date(tokenRec.value.expiresAt).getTime() < Date.now() : true)
+const registration = ref(tokenRec.value ? regsStore.byId(tokenRec.value.registrationId) : null)
 
 const signerName = ref('')
 const relationship = ref('Parent')
@@ -16,25 +24,25 @@ const error = ref<string | null>(null)
 const success = ref(false)
 const ts = ref('')
 
-function submit() {
+async function submit() {
   error.value = null
-  if (!registration || !tokenRec) { error.value = 'Invalid or expired link.'; return }
-  if (isExpired) { error.value = 'This link has expired.'; return }
+  if (!registration.value || !tokenRec.value) { error.value = 'Invalid or expired link.'; return }
+  if (isExpired.value) { error.value = 'This link has expired.'; return }
   if (!signerName.value.trim() || !relationship.value.trim() || !acknowledged.value) {
     error.value = 'Please provide name, relationship, and acknowledge.'
     return
   }
   const now = new Date().toISOString()
   const signatureHash = btoa(`${signerName.value}|${relationship.value}|${now}`)
-  ConsentsRepo.add({ id: IdUtil.uid('consent'), registrationId: registration.id, signerName: signerName.value.trim(), relationship: relationship.value.trim(), signatureHash, ts: now, userAgent: navigator.userAgent })
+  await consentsStore.add({ id: idFactory('consent'), registrationId: registration.value.id, signerName: signerName.value.trim(), relationship: relationship.value.trim(), signatureHash, ts: now, userAgent: navigator.userAgent })
   // Update registration: mark Parent step complete, status to WaitingCounselor
-  const next = { ...registration }
+  const next = { ...registration.value }
   next.status = 'WaitingCounselor'
   next.timeline = next.timeline.map(t => t.step === 'Parent' ? { ...t, state: 'Complete', updatedAt: now } : t)
-  next.history = [...next.history, { id: IdUtil.uid('h'), ts: now, actorRole: 'Parent', action: 'PARENT_CONSENTED', meta: { signerName: signerName.value } }]
-  RegistrationsRepo.upsert(next)
+  next.history = [...next.history, { id: idFactory('h'), ts: now, actorRole: 'Parent', action: 'PARENT_CONSENTED', meta: { signerName: signerName.value } }]
+  await regsStore.upsertOne(next)
   // invalidate token
-  ConsentTokensRepo.upsert({ ...tokenRec, usedAt: now })
+  await tokensStore.upsert({ ...(tokenRec.value!), usedAt: now } as any)
   success.value = true
   ts.value = now
 }

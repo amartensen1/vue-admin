@@ -1,0 +1,9 @@
+---
+description: Performance, images, vitals
+globs:
+  - "**/*"
+---
+
+- Lazy-load non-critical components; use `<Suspense>` for async islands.
+- Optimize images (WebP/AVIF, widths/heights, lazy). Prefer Nuxt image if present, but can remain static for prototype.
+- Mind LCP/CLS/INP; avoid layout shift (reserve space).

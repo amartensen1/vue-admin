@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { CoursesRepo } from '../repo/storage'
+import { computed, onMounted } from 'vue'
+import { useCoursesStore } from '../stores/courses.store'
 
 const route = useRoute()
 const router = useRouter()
 const id = String(route.params.id)
-const course = CoursesRepo.list().find(c => c.id === id) || null
+const store = useCoursesStore()
+onMounted(() => { store.fetchAll() })
+const course = computed(() => store.byId(id))
 </script>
 
 <template>

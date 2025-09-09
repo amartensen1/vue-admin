@@ -1,0 +1,9 @@
+---
+description: Design tokens & theming
+globs:
+  - "**/*"
+---
+
+- Centralize tokens in `tokens/` (colors, spacing, radii, typography, shadows).
+- Expose tokens via CSS vars (e.g., `:root { --color-primary: ... }`) and Tailwind config.
+- Dark mode and brand variants come from tokens—not per-component overrides.

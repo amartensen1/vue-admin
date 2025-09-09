@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { SectionsRepo, CoursesRepo, TermsRepo } from '../repo/storage'
+import { computed, onMounted } from 'vue'
+import { useSectionsStore } from '../stores/sections.store'
+import { useCoursesStore } from '../stores/courses.store'
+import { useTermsStore } from '../stores/terms.store'
 
 const route = useRoute()
 const router = useRouter()
 const id = String(route.params.id)
-const sect = SectionsRepo.list().find(s => s.id === id) || null
-const course = sect ? CoursesRepo.list().find(c => c.id === sect.courseId) : null
-const term = sect ? TermsRepo.list().find(t => t.id === sect.termId) : null
+const sectionsStore = useSectionsStore()
+const coursesStore = useCoursesStore()
+const termsStore = useTermsStore()
+onMounted(() => { sectionsStore.fetchAll(); coursesStore.fetchAll(); termsStore.fetchAll() })
+const sect = computed(() => sectionsStore.byId(id))
+const course = computed(() => sect.value ? coursesStore.byId(sect.value.courseId) : null)
+const term = computed(() => sect.value ? termsStore.byId(sect.value.termId) : null)
 </script>
 
 <template>

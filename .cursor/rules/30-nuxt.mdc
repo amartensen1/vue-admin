@@ -1,0 +1,14 @@
+---
+description: Nuxt 3 conventions (client-only prototype)
+globs:
+  - "pages/**/*.vue"
+  - "plugins/**/*.ts"
+  - "middleware/**/*.ts"
+  - "app.vue"
+---
+
+Nuxt
+- Use file-based routing in `pages/`.
+- Use `useAsyncData`/`useFetch` **only for local mock services** (no network).
+- Prefer client rendering for speed; SSR is optional—avoid introducing server deps.
+- SEO with `useSeoMeta`/`useHead`.

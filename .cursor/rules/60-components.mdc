@@ -1,0 +1,10 @@
+---
+description: Component authoring rules (global, reusable)
+globs:
+  - "components/**/*.vue"
+---
+
+- Single responsibility; extract logic to `composables/`.
+- Typed props; minimal surface. Use `defineEmits` for outputs.
+- Prefer computed state over branching templates; avoid long `v-if/else if` chains.
+- No direct store mutations inside atoms/molecules; bubble actions via emits.

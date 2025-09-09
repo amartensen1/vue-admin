@@ -1,0 +1,45 @@
+---
+description: Documented exceptions
+globs:
+  - "**/*"
+---
+
+- Nuxt 3 conventions (30-nuxt)
+  - Exception: Project uses Vite SPA (no Nuxt). Nuxt rules (file-based routing, useAsyncData, SSR) don't apply.
+  - Rationale: Prototype is client-only; simpler build/dev.
+  - Revisit: If migrating to Nuxt for SSR/SEO.
+
+- Types in src/types.ts (00-global prefers `type` over `interface`)
+  - Exception: Existing domain models are defined with `interface`.
+  - Rationale: Legacy typing; widely referenced.
+  - Revisit: Gradually convert to `type` aliases during future edits.
+
+- Services: DTO mappers and failure simulation (63-mock-services)
+  - Exception: Not all services implement explicit DTO↔Model mappers or simulated failures.
+  - Rationale: Prototype speed; current shapes are trivial.
+  - Revisit: Add `toModel/toDTO` and a small failure rate when expanding entities.
+
+- Registrations service CRUD symmetry (63-mock-services)
+  - Exception: `registrationsService` lacks `remove`.
+  - Rationale: UI doesn't expose deletion.
+  - Revisit: Add when UI needs it.
+
+- Radix Vue adoption (40-ui)
+  - Exception: Some interactive components (Drawer/Modal/Tabs) don't yet wrap Radix primitives.
+  - Rationale: Current components meet prototype needs.
+  - Revisit: Wrap with Radix for a11y/behavior enhancements.
+
+- Design tokens coverage (41-design-tokens)
+  - Exception: Colors exposed as CSS vars and mapped in Tailwind; spacing/radii/typography not fully wired.
+  - Rationale: Prioritized color theming and dark mode.
+  - Revisit: Extend Tailwind theme with more tokens as needed.
+
+- Dark mode toggle (41-design-tokens)
+  - Exception: Dark mode variables defined; no UI toggle yet.
+  - Rationale: Theme switch not required for validated flows.
+  - Revisit: Add simple toggle in header when theming is in scope.
+
+- Suspense usage (50-performance-seo / 62-pages)
+  - Exception: Async store hydration on mount; no `<Suspense>` wrapping pages.
+  - Rationale: Local data is fast; minimal perceived latency.
+  - Revisit: Add `<Suspense>` for heavy async islands if added later.

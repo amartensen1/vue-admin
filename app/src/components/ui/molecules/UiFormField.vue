@@ -8,8 +8,8 @@ defineProps<{ label?: string; hint?: string; error?: string; forId?: string }>()
     <div>
       <slot />
     </div>
-    <p v-if="hint && !error" class="text-xs text-gray-500">{{ hint }}</p>
-    <p v-if="error" class="text-xs text-red-600">{{ error }}</p>
+    <p v-if="hint && !error" class="text-xs text-muted">{{ hint }}</p>
+    <p v-if="error" class="text-xs text-danger">{{ error }}</p>
   </div>
 </template>
 

@@ -8,8 +8,8 @@ const active = computed(() => props.modelValue)
 
 <template>
   <div class="border-b flex items-center gap-2">
-    <button v-for="t in props.tabs" :key="t.key" class="px-3 py-2 text-sm -mb-px border-b-2"
-      :class="active===t.key ? 'border-blue-600 text-blue-700 font-medium' : 'border-transparent text-gray-600 hover:text-gray-800'"
+    <button v-for="t in props.tabs" :key="t.key" class="px-3 py-2 text-sm -mb-px border-b-2 focus:outline-none focus:ring-2 focus:ring-primary"
+      :class="active===t.key ? 'border-primary text-primary font-medium' : 'border-transparent text-muted hover:text-gray-800'"
       @click="select(t.key)">{{ t.label }}</button>
   </div>
   <div class="pt-3">

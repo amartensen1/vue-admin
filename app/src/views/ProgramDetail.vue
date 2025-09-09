@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { ProgramsRepo } from '../repo/storage'
+import { computed, onMounted } from 'vue'
+import { useProgramsStore } from '../stores/programs.store'
 
 const route = useRoute()
 const router = useRouter()
 const id = String(route.params.id)
-const prog = ProgramsRepo.list().find(p => p.id === id) || null
+const store = useProgramsStore()
+onMounted(() => { store.fetchAll() })
+const prog = computed(() => store.byId(id))
 </script>
 
 <template>

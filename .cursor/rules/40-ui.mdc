@@ -1,0 +1,22 @@
+---
+description: UI system (Atomic Design + Radix + Shadcn + Tailwind)
+globs:
+  - "components/**/*.{vue,ts}"
+  - "app.vue"
+  - "layouts/**/*.vue"
+---
+
+Atomic design
+- Build **atoms → molecules → organisms → templates → pages**.
+- Each component is **platform-level reusable**: no app-specific copy inside; expose via props/events/slots.
+- Prefer **Radix Vue primitives** for a11y/keyboard behavior; style with **Shadcn Vue** patterns and Tailwind.
+- Components accept **data + render**; they do **not** fetch.
+
+Mobile-first
+- Start from smallest breakpoint; progressively enhance up.
+- Avoid layout shift; specify widths/heights where possible.
+- Use Tailwind utilities before custom CSS; extract rare patterns into CSS only when repeated.
+
+Reusability
+- Prefer **slots** for structure variance, **props** for data/config, **emits** for user actions.
+- Style via **design tokens** (see `41-design-tokens.yml`), not hardcoded values.

@@ -1,24 +1,42 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
+import { useClipboard } from '@vueuse/core'
 import { useRoute, useRouter } from "vue-router";
-import { RegistrationsRepo, IdUtil, ConsentTokensRepo } from "../repo/storage";
-import type { RegistrationRecord, RegistrationTimelineItem } from "../types";
+import { idFactory } from "../helpers/idFactory";
+import { useRegistrationsStore } from "../stores/registrations.store";
+import { useConsentTokensStore } from "../stores/consent-tokens.store";
+import type { RegistrationRecord } from "../types";
 
 const route = useRoute();
 const router = useRouter();
 const regId = route.params.id as string;
-const reg = ref<RegistrationRecord | null>(RegistrationsRepo.list().find(r => r.id === regId) || null);
+const store = useRegistrationsStore();
+const tokensStore = useConsentTokensStore();
+const reg = ref<RegistrationRecord | null>(null);
+onMounted(async () => {
+  await store.fetchAll();
+  reg.value = store.byId(regId);
+});
 const tab = ref("timeline");
 
 const canAbandon = computed(() => reg.value && reg.value.status !== 'Complete' && reg.value.status !== 'Abandoned');
-const consentLink = computed(() => {
-  if (!reg.value) return ''
-  const existing = ConsentTokensRepo.list().find(t => t.registrationId === reg.value!.id && !t.usedAt)
+const consentLink = ref('')
+const { copy } = useClipboard()
+async function refreshConsentLink() {
+  if (!reg.value) { consentLink.value = ''; return }
+  const existing = tokensStore.activeByRegistrationId(reg.value!.id)
   const token = existing?.token
-  return token ? `${location.origin}/consent/${token}` : ''
-})
+  consentLink.value = token ? `${location.origin}/consent/${token}` : ''
+}
+onMounted(async () => { await tokensStore.fetchAll(); await refreshConsentLink() })
 
-function abandon() {
+function copyConsentLink() {
+  if (!consentLink.value) return
+  copy(consentLink.value as string)
+  alert('Link copied to clipboard')
+}
+
+async function abandon() {
   if (!reg.value) return;
   if (!confirm('Abandon this registration?')) return;
   const now = new Date().toISOString();
@@ -26,19 +44,20 @@ function abandon() {
     ...reg.value,
     status: 'Abandoned',
     timeline: reg.value.timeline.map(t => t.state === 'Complete' ? t : { ...t, state: 'Abandoned', updatedAt: now }),
-    history: [...reg.value.history, { id: IdUtil.uid('h'), ts: now, actorRole: 'Student', action: 'ABANDON', meta: {} }],
+    history: [...reg.value.history, { id: idFactory('h'), ts: now, actorRole: 'Student', action: 'ABANDON', meta: {} }],
   };
-  RegistrationsRepo.upsert(next);
+  await store.upsertOne(next);
   reg.value = next;
 }
 
-function generateConsentLink() {
+async function generateConsentLink() {
   if (!reg.value) return
   const now = new Date()
   const expires = new Date(now)
   expires.setDate(now.getDate() + 7)
-  const token = IdUtil.uid('consent')
-  ConsentTokensRepo.upsert({ token, registrationId: reg.value.id, createdAt: now.toISOString(), expiresAt: expires.toISOString() })
+  const token = idFactory('consent')
+  await tokensStore.upsert({ token, registrationId: reg.value.id, createdAt: now.toISOString(), expiresAt: expires.toISOString() })
+  await refreshConsentLink()
   alert(`Consent link generated:\n${location.origin}/consent/${token}`)
 }
 </script>
@@ -51,7 +70,7 @@ function generateConsentLink() {
         <UiBadge :tone="reg?.status==='Complete' ? 'success' : reg?.status==='Abandoned' ? 'danger' : 'warning'">{{ reg?.status }}</UiBadge>
         <UiButton variant="secondary" @click="router.push({ name: 'Registrations' })">Back</UiButton>
         <UiButton v-if="!consentLink && reg?.status==='WaitingParent'" variant="secondary" @click="generateConsentLink">Generate consent link</UiButton>
-        <UiButton v-else-if="consentLink" variant="secondary" @click="() => { navigator.clipboard.writeText(consentLink as string); alert('Link copied to clipboard') }">Copy link</UiButton>
+        <UiButton v-else-if="consentLink" variant="secondary" @click="copyConsentLink">Copy link</UiButton>
         <UiButton v-if="canAbandon" variant="ghost" @click="abandon">Abandon</UiButton>
       </div>
     </div>

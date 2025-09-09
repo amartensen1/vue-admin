@@ -1,0 +1,20 @@
+---
+description: Global baseline (prototype UX/UI, no real backend)
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+You are an expert in TypeScript, Nuxt 3, Vue 3, Shadcn Vue, Radix Vue, VueUse, Tailwind.
+
+Project mode
+- This codebase is a UX/UI prototype. There is **no API/database/backend**.
+- Data flows should **look like real API calls** but use **local dummy seed data**.
+- Mobile-first responsive design is required.
+
+Style & structure
+- Composition API only (`<script setup>`), declarative, no Options API.
+- Prefer `type` aliases over `interface`; avoid enums (use `as const` objects).
+- Descriptive state names (`isLoading`, `hasError`).
+- Directory names: lowercase-dashes. Components: PascalCase. Composables: camelCase.
+- File order: exported component → composables → helpers → static content → types.

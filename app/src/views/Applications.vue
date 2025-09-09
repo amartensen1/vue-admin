@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { Repository } from "../repo/storage";
-import { IdUtil } from "../repo/storage";
-import type { StudentApplicationRecord, DocumentMetadata } from "../types";
+import { computed, ref, onMounted } from "vue";
+import type { StudentApplicationRecord } from "../types";
 import { useSessionStore } from "../stores/session";
+import { useAuditStore } from "../stores/audit.store";
+import { idFactory } from "../helpers/idFactory";
+import { useApplicationsStore } from "../stores/applications.store";
 
 const view = ref<"list" | "kanban">("list");
 const query = ref("");
@@ -14,7 +15,9 @@ const dateTo = ref<string>("");
 const sortKey = ref<"updatedAt" | "name">("updatedAt");
 const sortDir = ref<"asc" | "desc">("desc");
 
-const records = ref<StudentApplicationRecord[]>(Repository.listApplications());
+const appStore = useApplicationsStore();
+const records = computed<StudentApplicationRecord[]>(() => appStore.items);
+onMounted(async () => { await appStore.fetchAll() })
 const schoolOptions = computed(() => {
   const names = Array.from(new Set(records.value.map(r => r.school.name || ""))).filter(Boolean).sort();
   return ["All", ...names];
@@ -41,10 +44,11 @@ const form = ref({
   class_rank: "",
 });
 const errors = ref<Record<string, string>>({});
-const docs = ref<DocumentMetadata[]>(Repository.listDocuments());
+const docs = computed(() => appStore.docs);
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
 const session = useSessionStore();
+const auditStore = useAuditStore();
 
 const filtersOpen = ref(false);
 
@@ -106,14 +110,14 @@ function softDuplicateWarning(): string | null {
   return exists ? "A student with the same name and DOB exists." : null;
 }
 
-function saveDraft() {
+async function saveDraft() {
   if (!validate()) return;
   const duplicate = softDuplicateWarning();
   if (duplicate && !confirm(`${duplicate}\nContinue?`)) return;
   const now = new Date().toISOString();
   if (!editingId.value) {
     const created: StudentApplicationRecord = {
-      id: IdUtil.uid("app"),
+      id: idFactory("app"),
       createdAt: now,
       updatedAt: now,
       createdBy: session.currentUser!.id,
@@ -129,12 +133,11 @@ function saveDraft() {
       hs_gpa: form.value.hs_gpa ? Number(form.value.hs_gpa) : undefined,
       class_rank: form.value.class_rank || undefined,
     };
-    records.value = [...records.value, created];
-    Repository.saveApplications(records.value);
-    Repository.appendAudit({ id: IdUtil.uid("audit"), ts: now, actorId: session.currentUser!.id, actorRole: session.currentUser!.role, action: "APP_CREATE", meta: { id: created.id } });
+    await appStore.saveAll([...records.value, created]);
+    await auditStore.append({ id: idFactory("audit"), ts: now, actorId: session.currentUser!.id, actorRole: session.currentUser!.role, action: "APP_CREATE", meta: { id: created.id } });
     editingId.value = created.id;
   } else {
-    const updated = Repository.updateApplication(editingId.value, {
+    await appStore.updateOne(editingId.value, {
       profile: { firstName: form.value.firstName.trim(), lastName: form.value.lastName.trim(), dob: form.value.dob || undefined, email: form.value.email || undefined, phone: form.value.phone || undefined },
       school: { name: form.value.schoolName || undefined },
       guardians: form.value.guardianName || form.value.guardianEmail || form.value.guardianPhone ? [{ name: form.value.guardianName || undefined, email: form.value.guardianEmail || undefined, phone: form.value.guardianPhone || undefined }] : [],
@@ -146,15 +149,12 @@ function saveDraft() {
       hs_gpa: form.value.hs_gpa ? Number(form.value.hs_gpa) : undefined,
       class_rank: form.value.class_rank || undefined,
     });
-    if (updated) {
-      records.value = records.value.map(r => r.id === updated.id ? updated : r);
-      Repository.appendAudit({ id: IdUtil.uid("audit"), ts: now, actorId: session.currentUser!.id, actorRole: session.currentUser!.role, action: "APP_EDIT", meta: { id: updated.id } });
-    }
+    await auditStore.append({ id: idFactory("audit"), ts: now, actorId: session.currentUser!.id, actorRole: session.currentUser!.role, action: "APP_EDIT", meta: { id: editingId.value } });
   }
   drawerOpen.value = false;
 }
 
-function submitApp() {
+async function submitApp() {
   if (!validate()) return;
   // require core fields for submit
   if (!form.value.dob || !form.value.email) {
@@ -163,11 +163,8 @@ function submitApp() {
   }
   const now = new Date().toISOString();
   if (!editingId.value) return;
-  const updated = Repository.updateApplication(editingId.value, { status: "Submitted" });
-  if (updated) {
-    records.value = records.value.map(r => r.id === updated.id ? updated : r);
-    Repository.appendAudit({ id: IdUtil.uid("audit"), ts: now, actorId: session.currentUser!.id, actorRole: session.currentUser!.role, action: "APP_SUBMIT", meta: { id: updated.id } });
-  }
+  await appStore.updateOne(editingId.value, { status: "Submitted" });
+  await auditStore.append({ id: idFactory("audit"), ts: now, actorId: session.currentUser!.id, actorRole: session.currentUser!.role, action: "APP_SUBMIT", meta: { id: editingId.value } });
   drawerOpen.value = false;
 }
 
@@ -180,7 +177,7 @@ async function onFileChange(file: File) {
     reader.onload = () => resolve(String(reader.result));
     reader.readAsDataURL(file);
   });
-  const add = Repository.addDocument({
+  const add = await appStore.addDocument({
     applicationId: editingId.value,
     kind: "Other",
     name: file.name,
@@ -190,18 +187,17 @@ async function onFileChange(file: File) {
     uploadedBy: session.currentUser.id,
   });
   if (add.ok) {
-    docs.value = Repository.listDocuments();
-    Repository.appendAudit({ id: IdUtil.uid("audit"), ts: new Date().toISOString(), actorId: session.currentUser.id, actorRole: session.currentUser.role, action: "DOC_ADD", meta: { applicationId: editingId.value, docId: add.value.id } });
+    // docs already updated in store
+    await auditStore.append({ id: idFactory("audit"), ts: new Date().toISOString(), actorId: session.currentUser.id, actorRole: session.currentUser.role, action: "DOC_ADD", meta: { applicationId: editingId.value, docId: add.value.id } });
   } else {
     alert(add.error);
   }
 }
 
-function removeDoc(id: string) {
+async function removeDoc(id: string) {
   if (!session.currentUser) return;
-  Repository.removeDocument(id);
-  docs.value = Repository.listDocuments();
-  Repository.appendAudit({ id: IdUtil.uid("audit"), ts: new Date().toISOString(), actorId: session.currentUser.id, actorRole: session.currentUser.role, action: "DOC_REMOVE", meta: { docId: id } });
+  await appStore.removeDocument(id);
+  await auditStore.append({ id: idFactory("audit"), ts: new Date().toISOString(), actorId: session.currentUser.id, actorRole: session.currentUser.role, action: "DOC_REMOVE", meta: { docId: id } });
 }
 
 const filtered = computed(() => {

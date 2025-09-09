@@ -1,0 +1,17 @@
+---
+description: Mock service layer (API-shaped, local data)
+globs:
+  - "services/**/*.ts"
+  - "seed/**/*.{ts,json}"
+  - "helpers/**/*.ts"
+---
+
+Service layer
+- Implement **repository-style services** (e.g., `userService`, `orderService`) that return Promises and mirror a real API: `list`, `get`, `create`, `update`, `remove`.
+- Read from `seed/` data (static arrays/JSON). **Never import seed into components**—only services.
+- Simulate network latency with a `delay(ms)` helper (100–400ms random).
+- Optionally simulate failures (5–10%) to test empty/error states.
+
+Types & mapping
+- Define `DTO` types to match a hypothetical API and `Model` types for the app; provide mappers: `toModel(dto)`, `toDTO(model)`.
+- Keep IDs stable; provide an `idFactory` helper for creates.

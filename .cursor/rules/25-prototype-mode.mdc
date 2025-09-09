@@ -1,0 +1,9 @@
+---
+description: Prototype mode (mock services, no server routes)
+globs:
+  - "**/*"
+---
+
+- Do **not** create real server routes under `server/` or call external APIs.
+- All "API" access goes through a **client-side mock service layer** in `services/` that returns Promises and simulates latency/errors.
+- Stores depend on services; components depend on stores (components never import seed data directly).

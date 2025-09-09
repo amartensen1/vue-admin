@@ -1,38 +1,71 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { ProgramsRepo, TermsRepo, CoursesRepo, SectionsRepo, HighSchoolsRepo, SettingsRepo, IdUtil } from '../repo/storage'
+import { ref, watch, onMounted } from 'vue'
 import type { ProgramRecord, TermRecord, CourseRecord, SectionRecord, HighSchoolRecord, SettingsRecord } from '../types'
 import { useRoute, useRouter } from 'vue-router'
+import { useProgramsStore } from '../stores/programs.store'
+import { useTermsStore } from '../stores/terms.store'
+import { useCoursesStore } from '../stores/courses.store'
+import { useSectionsStore } from '../stores/sections.store'
+import { useHighSchoolsStore } from '../stores/high-schools.store'
+import { useSettingsStore } from '../stores/settings.store'
 
 const route = useRoute()
 const router = useRouter()
 const initialTab = typeof route.params.tab === 'string' ? route.params.tab : 'Programs'
 const tab = ref(initialTab)
 
-// load
-const programs = ref<ProgramRecord[]>(ProgramsRepo.list())
-const terms = ref<TermRecord[]>(TermsRepo.list())
-const courses = ref<CourseRecord[]>(CoursesRepo.list())
-const sections = ref<SectionRecord[]>(SectionsRepo.list())
-const highSchools = ref<HighSchoolRecord[]>(HighSchoolsRepo.list())
-const settings = ref<SettingsRecord>(SettingsRepo.get())
+const programsStore = useProgramsStore()
+const termsStore = useTermsStore()
+const coursesStore = useCoursesStore()
+const sectionsStore = useSectionsStore()
+const highSchoolsStore = useHighSchoolsStore()
+const settingsStore = useSettingsStore()
 
-function addProgram() { const p = { id: IdUtil.uid('prog'), name: 'New Program' }; programs.value=[...programs.value,p]; ProgramsRepo.saveAll(programs.value) }
-function removeProgram(id:string){ programs.value = programs.value.filter(x=>x.id!==id); ProgramsRepo.saveAll(programs.value) }
+onMounted(async () => {
+  await Promise.all([
+    programsStore.fetchAll(),
+    termsStore.fetchAll(),
+    coursesStore.fetchAll(),
+    sectionsStore.fetchAll(),
+    highSchoolsStore.fetchAll(),
+    settingsStore.fetch(),
+  ])
+})
 
-function addTerm(){ const t: TermRecord = { id: IdUtil.uid('term'), name: 'New Term', isActive: true, customDates: {} }; terms.value=[...terms.value,t]; TermsRepo.saveAll(terms.value) }
-function removeTerm(id:string){ terms.value = terms.value.filter(x=>x.id!==id); TermsRepo.saveAll(terms.value) }
+const programs = ref<ProgramRecord[]>([])
+const terms = ref<TermRecord[]>([])
+const courses = ref<CourseRecord[]>([])
+const sections = ref<SectionRecord[]>([])
+const highSchools = ref<HighSchoolRecord[]>([])
+const settings = ref<SettingsRecord>({ registrationOpen: true })
 
-function addCourse(){ const c: CourseRecord = { id: IdUtil.uid('course'), title: 'New Course' }; courses.value=[...courses.value,c]; CoursesRepo.saveAll(courses.value) }
-function removeCourse(id:string){ courses.value = courses.value.filter(x=>x.id!==id); CoursesRepo.saveAll(courses.value) }
+watch(() => programsStore.items, (val) => { programs.value = val }, { immediate: true })
+watch(() => termsStore.items, (val) => { terms.value = val }, { immediate: true })
+watch(() => coursesStore.items, (val) => { courses.value = val }, { immediate: true })
+watch(() => sectionsStore.items, (val) => { sections.value = val }, { immediate: true })
+watch(() => highSchoolsStore.items, (val) => { highSchools.value = val }, { immediate: true })
+watch(() => settingsStore.item, (val) => { if (val) settings.value = val }, { immediate: true })
 
-function addSection(){ const s: SectionRecord = { id: IdUtil.uid('sect'), courseId: courses.value[0]?.id || '', termId: terms.value[0]?.id || '', allowRegistration: true }; sections.value=[...sections.value,s]; SectionsRepo.saveAll(sections.value) }
-function removeSection(id:string){ sections.value = sections.value.filter(x=>x.id!==id); SectionsRepo.saveAll(sections.value) }
+function addProgram() { programsStore.createOne({ name: 'New Program' } as ProgramRecord) }
+function removeProgram(id:string){ programsStore.removeOne(id) }
 
-function addHS(){ const h: HighSchoolRecord = { id: IdUtil.uid('hs'), name: 'New High School' }; highSchools.value=[...highSchools.value,h]; HighSchoolsRepo.saveAll(highSchools.value) }
-function removeHS(id:string){ highSchools.value = highSchools.value.filter(x=>x.id!==id); HighSchoolsRepo.saveAll(highSchools.value) }
+function addTerm(){ termsStore.createOne({ name: 'New Term', isActive: true, customDates: {} } as TermRecord) }
+function removeTerm(id:string){ termsStore.removeOne(id) }
 
-function saveSettings(){ SettingsRepo.set(settings.value) }
+function addCourse(){ coursesStore.createOne({ title: 'New Course' } as CourseRecord) }
+function removeCourse(id:string){ coursesStore.removeOne(id) }
+
+function addSection(){
+  const firstCourse = courses.value[0]?.id || ''
+  const firstTerm = terms.value[0]?.id || ''
+  sectionsStore.createOne({ courseId: firstCourse, termId: firstTerm, allowRegistration: true } as SectionRecord)
+}
+function removeSection(id:string){ sectionsStore.removeOne(id) }
+
+function addHS(){ highSchoolsStore.createOne({ name: 'New High School' } as HighSchoolRecord) }
+function removeHS(id:string){ highSchoolsStore.removeOne(id) }
+
+async function saveSettings(){ await settingsStore.save(settings.value) }
 
 function exportAll(){
   const data = {
@@ -52,15 +85,15 @@ function exportAll(){
 function importAll(e: Event){
   const input = e.target as HTMLInputElement; const file = input.files && input.files[0]; if(!file) return;
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try{
       const obj = JSON.parse(String(reader.result));
-      if (obj.programs) { programs.value = obj.programs; ProgramsRepo.saveAll(programs.value) }
-      if (obj.terms) { terms.value = obj.terms; TermsRepo.saveAll(terms.value) }
-      if (obj.courses) { courses.value = obj.courses; CoursesRepo.saveAll(courses.value) }
-      if (obj.sections) { sections.value = obj.sections; SectionsRepo.saveAll(sections.value) }
-      if (obj.highSchools) { highSchools.value = obj.highSchools; HighSchoolsRepo.saveAll(highSchools.value) }
-      if (obj.settings) { settings.value = obj.settings; SettingsRepo.set(settings.value) }
+      if (obj.programs) { programs.value = obj.programs; await Promise.all(obj.programs.map((p:ProgramRecord)=>programsStore.updateOne(p.id,p))) }
+      if (obj.terms) { terms.value = obj.terms; await Promise.all(obj.terms.map((t:TermRecord)=>termsStore.updateOne(t.id,t))) }
+      if (obj.courses) { courses.value = obj.courses; await Promise.all(obj.courses.map((c:CourseRecord)=>coursesStore.updateOne(c.id,c))) }
+      if (obj.sections) { sections.value = obj.sections; await Promise.all(obj.sections.map((s:SectionRecord)=>sectionsStore.updateOne(s.id,s))) }
+      if (obj.highSchools) { highSchools.value = obj.highSchools; await Promise.all(obj.highSchools.map((h:HighSchoolRecord)=>highSchoolsStore.updateOne(h.id,h))) }
+      if (obj.settings) { settings.value = obj.settings; await settingsStore.save(obj.settings) }
       alert('Imported successfully')
     }catch(err){ alert('Invalid JSON') }
   }
@@ -110,11 +143,11 @@ watch(() => route.params.tab, (val) => {
       <div class="divide-y">
         <div v-for="t in terms" :key="t.id" class="grid grid-cols-1 sm:grid-cols-5 gap-2 p-2 items-center">
           <router-link class="text-blue-600 hover:underline sm:col-span-2" :to="{ name: 'TermDetail', params: { id: t.id } }">{{ t.name }}</router-link>
-          <label class="flex items-center gap-2 text-sm"><UiCheckbox v-model="t.isActive" @update:modelValue="TermsRepo.saveAll(terms)" /> Active</label>
+          <label class="flex items-center gap-2 text-sm"><UiCheckbox v-model="t.isActive" @update:modelValue="(v:boolean)=>termsStore.updateOne(t.id,{ isActive: v })" /> Active</label>
           <UiInput :model-value="t.customDates?.registrationStart || ''" placeholder="Reg Start (YYYY-MM-DD)"
-            @update:modelValue="(v:string)=>{ t.customDates = { ...(t.customDates||{}), registrationStart: v }; TermsRepo.saveAll(terms) }" />
+            @update:modelValue="(v:string)=>{ t.customDates = { ...(t.customDates||{}), registrationStart: v }; termsStore.updateOne(t.id,{ customDates: t.customDates }) }" />
           <UiInput :model-value="t.customDates?.registrationEnd || ''" placeholder="Reg End (YYYY-MM-DD)"
-            @update:modelValue="(v:string)=>{ t.customDates = { ...(t.customDates||{}), registrationEnd: v }; TermsRepo.saveAll(terms) }" />
+            @update:modelValue="(v:string)=>{ t.customDates = { ...(t.customDates||{}), registrationEnd: v }; termsStore.updateOne(t.id,{ customDates: t.customDates }) }" />
           <UiButton variant="secondary" @click="removeTerm(t.id)">Remove</UiButton>
         </div>
       </div>
@@ -128,8 +161,8 @@ watch(() => route.params.tab, (val) => {
       <div class="divide-y">
         <div v-for="c in courses" :key="c.id" class="grid grid-cols-1 sm:grid-cols-4 gap-2 p-2 items-center">
           <router-link class="text-blue-600 hover:underline" :to="{ name: 'CourseDetail', params: { id: c.id } }">{{ c.title }}</router-link>
-          <UiInput v-model="c.code" placeholder="Code" @update:modelValue="CoursesRepo.saveAll(courses)" />
-          <UiSelect v-model="c.programId" @update:modelValue="CoursesRepo.saveAll(courses)">
+          <UiInput v-model="c.code" placeholder="Code" @update:modelValue="(v:string)=>coursesStore.updateOne(c.id,{ code: v })" />
+          <UiSelect v-model="c.programId" @update:modelValue="(v:string|undefined)=>coursesStore.updateOne(c.id,{ programId: v as any })">
             <option :value="undefined">No Program</option>
             <option v-for="p in programs" :value="p.id">{{ p.name }}</option>
           </UiSelect>
@@ -146,15 +179,15 @@ watch(() => route.params.tab, (val) => {
       <div class="divide-y">
         <div v-for="s in sections" :key="s.id" class="grid grid-cols-1 sm:grid-cols-6 gap-2 p-2 items-center">
           <router-link class="text-blue-600 hover:underline" :to="{ name: 'SectionDetail', params: { id: s.id } }">{{ s.title || 'Section' }}</router-link>
-          <UiSelect v-model="s.courseId" @update:modelValue="SectionsRepo.saveAll(sections)">
+          <UiSelect v-model="s.courseId" @update:modelValue="(v:string)=>sectionsStore.updateOne(s.id,{ courseId: v })">
             <option v-for="c in courses" :value="c.id">{{ c.title }}</option>
           </UiSelect>
-          <UiSelect v-model="s.termId" @update:modelValue="SectionsRepo.saveAll(sections)">
+          <UiSelect v-model="s.termId" @update:modelValue="(v:string)=>sectionsStore.updateOne(s.id,{ termId: v })">
             <option v-for="t in terms" :value="t.id">{{ t.name }}</option>
           </UiSelect>
-          <UiInput v-model="s.capacity" type="number" placeholder="Capacity" @update:modelValue="SectionsRepo.saveAll(sections)" />
-          <label class="flex items-center gap-2 text-sm"><UiCheckbox v-model="s.allowRegistration" @update:modelValue="SectionsRepo.saveAll(sections)" /> Allow Registration</label>
-          <UiInput v-model="s.meetingInfo" placeholder="Meeting info" @update:modelValue="SectionsRepo.saveAll(sections)" />
+          <UiInput v-model="s.capacity" type="number" placeholder="Capacity" @update:modelValue="(v:any)=>sectionsStore.updateOne(s.id,{ capacity: Number(v) })" />
+          <label class="flex items-center gap-2 text-sm"><UiCheckbox v-model="s.allowRegistration" @update:modelValue="(v:boolean)=>sectionsStore.updateOne(s.id,{ allowRegistration: v })" /> Allow Registration</label>
+          <UiInput v-model="s.meetingInfo" placeholder="Meeting info" @update:modelValue="(v:string)=>sectionsStore.updateOne(s.id,{ meetingInfo: v })" />
           <UiButton variant="secondary" @click="removeSection(s.id)">Remove</UiButton>
         </div>
       </div>

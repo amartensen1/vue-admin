@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { RegistrationsRepo } from "../repo/storage";
-import type { RegistrationRecord } from "../types";
+import { computed, ref, onMounted } from "vue";
+import { useRegistrationsStore } from "../stores/registrations.store";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const regs = ref<RegistrationRecord[]>(RegistrationsRepo.list());
+const store = useRegistrationsStore();
+const regs = computed(() => store.items);
+
+onMounted(() => { store.fetchAll() });
 
 const query = ref("");
 const filtered = computed(() => {

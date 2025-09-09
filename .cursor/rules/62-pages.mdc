@@ -1,0 +1,8 @@
+---
+description: Page-level data orchestration
+globs:
+  - "pages/**/*.vue"
+---
+
+- Use `useAsyncData` to call **stores** (which call services). Pages handle loading/error UI (e.g., `<Suspense>`).
+- Keep pages thin; push logic into stores/composables.

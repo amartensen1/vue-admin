@@ -1,0 +1,11 @@
+---
+description: Pinia stores that look like API-driven state
+globs:
+  - "stores/**/*.ts"
+---
+
+- `defineStore` with typed `state/getters/actions`.
+- Actions call **services**; handle `isLoading`, `hasError`, `errorMessage`.
+- Support **optimistic updates** for create/update/remove; roll back on failure.
+- No direct seed access; all data flows through the service layer.
+- Provide **selectors** for derived state to keep components dumb.

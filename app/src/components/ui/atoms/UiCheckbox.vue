@@ -9,7 +9,7 @@ const value = computed({
 </script>
 
 <template>
-  <input type="checkbox" v-model="value" :disabled="props.disabled" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+  <input type="checkbox" v-model="value" :disabled="props.disabled" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" v-bind="$attrs" />
 </template>
 
 <style scoped>

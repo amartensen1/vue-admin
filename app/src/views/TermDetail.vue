@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { TermsRepo } from '../repo/storage'
+import { computed, onMounted } from 'vue'
+import { useTermsStore } from '../stores/terms.store'
 
 const route = useRoute()
 const router = useRouter()
 const id = String(route.params.id)
-const term = TermsRepo.list().find(t => t.id === id) || null
+const store = useTermsStore()
+onMounted(() => { store.fetchAll() })
+const term = computed(() => store.byId(id))
 </script>
 
 <template>

@@ -1,0 +1,13 @@
+---
+description: Vue 3 / Composition API specifics
+globs:
+  - "components/**/*.vue"
+  - "pages/**/*.vue"
+  - "layouts/**/*.vue"
+---
+
+Vue 3 patterns
+- Use `<script setup>` with `ref/reactive/computed`.
+- Prefer `defineProps`, `defineEmits`, `defineModel`.
+- Provide/inject only for true cross-tree deps; otherwise composables.
+- Template-first rendering; computed > methods for derived state.

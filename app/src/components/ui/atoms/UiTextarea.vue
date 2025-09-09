@@ -14,7 +14,8 @@ const value = computed({
     :rows="rows ?? 3"
     :placeholder="props.placeholder"
     :disabled="props.disabled"
-    class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+    class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+    v-bind="$attrs"
   />
 </template>
 

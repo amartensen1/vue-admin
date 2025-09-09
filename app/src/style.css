@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+:root {
+  --color-primary: #2563eb;
+  --color-danger: #ef4444;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-muted: #6b7280;
+}
+
+.dark {
+  --color-primary: #3b82f6;
+  --color-danger: #f87171;
+  --color-success: #22c55e;
+  --color-warning: #fbbf24;
+  --color-muted: #9ca3af;
+}
+
 /* App shell sizing */
 #app {
   min-height: 100vh;

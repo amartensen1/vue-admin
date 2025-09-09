@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { HighSchoolsRepo } from '../repo/storage'
+import { computed, onMounted } from 'vue'
+import { useHighSchoolsStore } from '../stores/high-schools.store'
 
 const route = useRoute()
 const router = useRouter()
 const id = String(route.params.id)
-const hs = HighSchoolsRepo.list().find(h => h.id === id) || null
+const store = useHighSchoolsStore()
+onMounted(() => { store.fetchAll() })
+const hs = computed(() => store.byId(id))
 </script>
 
 <template>

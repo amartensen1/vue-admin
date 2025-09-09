@@ -1,0 +1,10 @@
+---
+description: Composable patterns
+globs:
+  - "composables/**/*.ts"
+---
+
+- Name as `useThing.ts`; return a typed API object.
+- No DOM access from composables (except dedicated ones like `useElementSize`).
+- Wrap 3rd-party hooks with a stable, app-agnostic API.
+- Prefer VueUse utilities before custom code.
