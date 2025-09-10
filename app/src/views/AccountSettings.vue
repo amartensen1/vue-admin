@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useAccountStore } from '../stores/account.store'
+import AccountLayout from '../components/AccountLayout.vue'
 const account = useAccountStore()
 onMounted(()=> account.fetch())
 
@@ -59,8 +60,9 @@ async function saveAvatar(){ await account.updateAvatar(avatarPreview.value) }
 <template>
   <div class="space-y-4">
     <UiToolbar title="User Settings" />
+    <AccountLayout>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="space-y-4">
       <section class="bg-white rounded border p-4 space-y-3">
         <h3 class="text-sm font-semibold">Personal Information</h3>
         <UiFormField label="First Name">
@@ -117,6 +119,7 @@ async function saveAvatar(){ await account.updateAvatar(avatarPreview.value) }
         <UiButton @click="saveSecurity">Update Security</UiButton>
       </section>
     </div>
+    </AccountLayout>
   </div>
 </template>
 

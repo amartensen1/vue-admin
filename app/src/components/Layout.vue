@@ -8,10 +8,10 @@ function toggleCollapse(){ isCollapsed.value = !isCollapsed.value }
 
 <template>
   <div class="min-h-screen flex flex-col">
-    <AppHeader @toggle-nav="toggleNav" />
+    <AppHeader @toggle-nav="toggleNav" :show-menu="$route.path.startsWith('/account') ? false : true" />
     <div class="flex-1 flex">
       <!-- Desktop sidebar under header -->
-      <aside class="hidden sm:flex flex-col border-r bg-white transition-[width] duration-200" :class="isCollapsed ? 'w-14' : 'w-56'">
+      <aside v-if="!$route.path.startsWith('/account')" class="hidden sm:flex flex-col border-r bg-white transition-[width] duration-200" :class="isCollapsed ? 'w-14' : 'w-56'">
         <div class="p-2 border-b flex items-center justify-between">
           <span class="text-sm font-semibold" :class="isCollapsed ? 'sr-only' : ''">Navigation</span>
           <button class="px-2 py-1 rounded text-xs border" :title="isCollapsed ? 'Expand' : 'Collapse'" @click="toggleCollapse">{{ isCollapsed ? '›' : '‹' }}</button>
@@ -37,7 +37,7 @@ function toggleCollapse(){ isCollapsed.value = !isCollapsed.value }
       </aside>
 
       <!-- Mobile drawer (overlays under header) -->
-      <UiDrawer class="sm:hidden" :open="navOpen" side="left" title="Navigation" @close="navOpen=false">
+      <UiDrawer v-if="!$route.path.startsWith('/account')" class="sm:hidden" :open="navOpen" side="left" title="Navigation" @close="navOpen=false">
         <div class="flex flex-col min-h-[60vh]">
           <nav class="space-y-1">
             <router-link to="/apps" class="block px-2 py-1 rounded text-sm" :class="$route.path.startsWith('/apps') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'" @click="navOpen=false">Applications</router-link>

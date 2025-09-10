@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useAccountStore } from '../stores/account.store'
+import AccountLayout from '../components/AccountLayout.vue'
 const account = useAccountStore()
 onMounted(()=> account.fetch())
 </script>
@@ -8,6 +9,7 @@ onMounted(()=> account.fetch())
 <template>
   <div class="space-y-4">
     <UiToolbar title="Account Settings" />
+    <AccountLayout>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="bg-white rounded border p-4 flex items-center gap-3">
@@ -39,6 +41,7 @@ onMounted(()=> account.fetch())
         </div>
       </div>
     </div>
+    </AccountLayout>
   </div>
 </template>
 

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from "pinia";
 import { useSessionStore } from "../../../stores/session";
 const session = useSessionStore();
+const props = defineProps<{ showMenu?: boolean }>()
 const { currentUser } = storeToRefs(session);
 const emit = defineEmits(["toggle-nav"]) 
 const showUserMenu = ref(false)
@@ -48,7 +49,7 @@ onBeforeUnmount(()=>{
   <header class="border-b bg-white/80 backdrop-blur sticky top-0 z-10">
     <div class="mx-auto max-w-6xl px-2 sm:px-4 py-3 flex flex-wrap items-center gap-2 justify-between">
       <div class="flex items-center gap-2 sm:gap-3">
-        <button class="px-2 py-1 rounded text-sm border sm:hidden" @click="emit('toggle-nav')">Menu</button>
+        <button v-if="props.showMenu !== false" class="px-2 py-1 rounded text-sm border sm:hidden" @click="emit('toggle-nav')">Menu</button>
         <span class="font-semibold">DualEnroll</span>
         <UiBadge tone="warning">Prototype</UiBadge>
       </div>
