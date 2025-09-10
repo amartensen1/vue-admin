@@ -20,8 +20,7 @@ async function goSettings(){
 }
 function goProfile(){
   closeUserMenu()
-  // Placeholder navigation; implement profile view later
-  router.push({ name: 'Applications' })
+  router.push({ name: 'UserProfile' })
 }
 async function signOut(){
   closeUserMenu()

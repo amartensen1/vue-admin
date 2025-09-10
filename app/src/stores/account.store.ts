@@ -1,22 +1,26 @@
 import { defineStore } from "pinia";
-import type { Account } from "../services/account.service";
+import type { Account, Membership } from "../services/account.service";
 import { accountService } from "../services/account.service";
 
 type State = {
   item: Account | null;
+  memberships: Membership[];
   isLoading: boolean;
   hasError: boolean;
   errorMessage?: string;
 };
 
 export const useAccountStore = defineStore("account", {
-  state: (): State => ({ item: null, isLoading: false, hasError: false, errorMessage: undefined }),
+  state: (): State => ({ item: null, memberships: [], isLoading: false, hasError: false, errorMessage: undefined }),
   actions: {
     async fetch() {
       this.isLoading = true; this.hasError = false; this.errorMessage = undefined;
       try { this.item = await accountService.get(); }
       catch (e: any) { this.hasError = true; this.errorMessage = e?.message ?? 'Failed to load account'; }
       finally { this.isLoading = false }
+    },
+    async fetchMemberships() {
+      try { this.memberships = await accountService.listMemberships() } catch(_e) {}
     },
     async updateProfile(patch: { firstName?: string; lastName?: string; pronouns?: string }) {
       this.item = await accountService.updateProfile(patch);

@@ -1,5 +1,13 @@
 import { delay } from "../helpers/delay";
 
+type Membership = {
+  id: string;
+  institutionName: string;
+  institutionType: 'College' | 'HighSchool';
+  roles: string[];
+  portalPath: string; // route to open
+}
+
 type Account = {
   firstName: string;
   lastName: string;
@@ -10,6 +18,7 @@ type Account = {
   twoFactorEnabled: boolean;
   passwordLastUpdatedAt?: string;
   passwordHash?: string; // prototype only
+  memberships: Membership[];
 };
 
 const STORAGE_KEY = "de.account";
@@ -30,6 +39,10 @@ function getDefault(): Account {
     twoFactorEnabled: false,
     passwordLastUpdatedAt: new Date().toISOString(),
     passwordHash: "demo",
+    memberships: [
+      { id: 'm1', institutionName: 'Example College', institutionType: 'College', roles: ['Program Staff'], portalPath: '/admin' },
+      { id: 'm2', institutionName: 'Riverside High School', institutionType: 'HighSchool', roles: ['Counselor'], portalPath: '/apps' },
+    ],
   }
 }
 
@@ -67,9 +80,10 @@ export const accountService = {
   },
   async updateAvatar(dataUrl: string | undefined): Promise<Account> {
     await delay(); cache = { ...ensure(), avatarDataUrl: dataUrl }; save(); return { ...cache! };
-  }
+  },
+  async listMemberships(): Promise<Membership[]> { await delay(); return [...ensure().memberships] },
 }
 
-export type { Account };
+export type { Account, Membership };
 
 
